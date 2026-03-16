@@ -1,0 +1,613 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                                                         String               @id @default(cuid())
+  email                                                      String               @unique
+  phone                                                      String?              @unique
+  password                                                   String
+  role                                                       String
+  fullName                                                   String               @map("full_name")
+  avatarUrl                                                  String?              @map("avatar_url")
+  ninEncrypted                                               String?              @map("nin_encrypted")
+  ninHash                                                    String?              @map("nin_hash")
+  ninVerified                                                Boolean?             @default(false) @map("nin_verified")
+  bvn_encrypted                                              String?
+  id_type                                                    String?
+  id_number_enc                                              String?
+  idVerified                                                 Boolean?             @default(false) @map("id_verified")
+  id_doc_url                                                 String?
+  isActive                                                   Boolean?             @default(true) @map("is_active")
+  isBanned                                                   Boolean?             @default(false) @map("is_banned")
+  banReason                                                  String?              @map("ban_reason")
+  agentTier                                                  String?              @default("standard") @map("agent_tier")
+  agentApproved                                              Boolean?             @default(false) @map("agent_approved")
+  agentBio                                                   String?              @map("agent_bio")
+  agentAreas                                                 Json?                @map("agent_areas")
+  createdAt                                                  DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                                  DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lastLogin                                                  DateTime?            @map("last_login") @db.Timestamptz(6)
+  employmentStatus                                           String?              @map("employment_status")
+  employmentType                                             String?              @map("employment_type")
+  employerName                                               String?              @map("employer_name")
+  jobTitle                                                   String?              @map("job_title")
+  yearlyIncome                                               BigInt?              @map("yearly_income")
+  incomeVerified                                             Boolean?             @default(false) @map("income_verified")
+  profileBio                                                 String?              @map("profile_bio")
+  profileCompleted                                           Boolean?             @default(false) @map("profile_completed")
+  guarantorName                                              String?              @map("guarantor_name")
+  guarantorPhone                                             String?              @map("guarantor_phone")
+  guarantorRelationship                                      String?              @map("guarantor_relationship")
+  clerkUserId                                                String?              @unique @map("clerk_user_id")
+  agreement_signatures                                       AgreementSignature[]
+  agreements_agreements_agent_idTousers                      Agreement[]          @relation("agreements_agent_idTousers")
+  landlordAgreements                                         Agreement[]          @relation("LandlordAgreements")
+  tenantAgreements                                           Agreement[]          @relation("TenantAgreements")
+  landlordConversations                                      Conversation[]       @relation("LandlordConversations")
+  tenantConversations                                        Conversation[]       @relation("TenantConversations")
+  disputes_disputes_againstTousers                           disputes[]           @relation("disputes_againstTousers")
+  disputes_disputes_assigned_adminTousers                    disputes[]           @relation("disputes_assigned_adminTousers")
+  disputes_disputes_raised_byTousers                         disputes[]           @relation("disputes_raised_byTousers")
+  listing_flags                                              ListingFlag[]
+  agentListings                                              Listing[]            @relation("AgentListings")
+  listings                                                   Listing[]            @relation("OwnerListings")
+  maintenance_tickets_maintenance_tickets_assigned_toTousers MaintenanceTicket[]  @relation("maintenance_tickets_assigned_toTousers")
+  maintenance_tickets_maintenance_tickets_raised_byTousers   MaintenanceTicket[]  @relation("maintenance_tickets_raised_byTousers")
+  maintenance_tickets_maintenance_tickets_tenant_idTousers   MaintenanceTicket[]  @relation("maintenance_tickets_tenant_idTousers")
+  sentMessages                                               Message[]
+  notifications                                              Notification[]
+  org_members_org_members_invited_byTousers                  OrgMember[]          @relation("org_members_invited_byTousers")
+  orgMemberships                                             OrgMember[]
+  ownedOrgs                                                  Organisation[]
+  phone_otps                                                 phone_otps[]
+  refresh_tokens                                             refresh_tokens[]
+  savedListings                                              SavedListing[]
+  screening_calls_screening_calls_agent_idTousers            screening_calls[]    @relation("screening_calls_agent_idTousers")
+  screening_calls_screening_calls_landlord_idTousers         screening_calls[]    @relation("screening_calls_landlord_idTousers")
+  screening_calls_screening_calls_tenant_idTousers           screening_calls[]    @relation("screening_calls_tenant_idTousers")
+  transactions_transactions_agent_idTousers                  Transaction[]        @relation("transactions_agent_idTousers")
+  transactions_transactions_escrow_released_byTousers        Transaction[]        @relation("transactions_escrow_released_byTousers")
+  transactions_transactions_payee_idTousers                  Transaction[]        @relation("transactions_payee_idTousers")
+  transactions_transactions_payer_idTousers                  Transaction[]        @relation("transactions_payer_idTousers")
+  verifications_verifications_l1_reviewer_idTousers          Verification[]       @relation("verifications_l1_reviewer_idTousers")
+  verifications_verifications_l3_reviewer_idTousers          Verification[]       @relation("verifications_l3_reviewer_idTousers")
+  verifications_verifications_l4_agent_idTousers             Verification[]       @relation("verifications_l4_agent_idTousers")
+  verifications_verifications_l5_admin_idTousers             Verification[]       @relation("verifications_l5_admin_idTousers")
+  verifications_verifications_owner_idTousers                Verification[]       @relation("verifications_owner_idTousers")
+
+  @@index([email], map: "idx_users_email")
+  @@index([ninHash], map: "idx_users_nin_hash")
+  @@map("users")
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model Listing {
+  id                  String              @id @default(cuid())
+  ownerId             String              @map("owner_id")
+  agentId             String?             @map("agent_id")
+  title               String
+  description         String?
+  listingType         String              @map("listing_type")
+  propertyType        String              @map("property_type")
+  address             String
+  area                String
+  state               String              @default("Lagos")
+  latitude            Decimal?            @db.Decimal(10, 7)
+  longitude           Decimal?            @db.Decimal(10, 7)
+  price               Decimal             @db.Decimal(15, 2)
+  pricePeriod         String?             @map("price_period")
+  cautionDeposit      Decimal?            @map("caution_deposit") @db.Decimal(15, 2)
+  serviceCharge       Decimal?            @map("service_charge") @db.Decimal(15, 2)
+  bedrooms            Int?
+  bathrooms           Int?
+  toilets             Int?
+  sizeSqm             Decimal?            @map("size_sqm") @db.Decimal(10, 2)
+  floor_level         Int?
+  total_floors        Int?
+  parking_spaces      Int?                @default(0)
+  furnished           Boolean?            @default(false)
+  amenities           Json?
+  status              String?             @default("draft")
+  isFeatured          Boolean?            @default(false) @map("is_featured")
+  viewsCount          Int?                @default(0) @map("views_count")
+  saves_count         Int?                @default(0)
+  available_from      DateTime?           @db.Date
+  minimum_stay        Int?
+  verificationTier    String?             @default("none") @map("verification_tier")
+  createdAt           DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  agreements          Agreement[]
+  conversations       Conversation[]
+  flags               ListingFlag[]
+  images              ListingImage[]
+  agent               User?               @relation("AgentListings", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  owner               User                @relation("OwnerListings", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  maintenance_tickets MaintenanceTicket[]
+  orgListings         OrgListing[]
+  savedBy             SavedListing[]
+  screening_calls     screening_calls[]
+  transactions        Transaction[]
+  verification        Verification?
+
+  @@index([area], map: "idx_listings_area")
+  @@index([ownerId], map: "idx_listings_owner")
+  @@index([price], map: "idx_listings_price")
+  @@index([status], map: "idx_listings_status")
+  @@index([listingType], map: "idx_listings_type")
+  @@index([verificationTier], map: "idx_listings_verified")
+  @@map("listings")
+}
+
+model ListingImage {
+  id        String    @id @default(cuid())
+  listingId String    @map("listing_id")
+  url       String
+  publicId  String?   @map("public_id")
+  isCover   Boolean?  @default(false) @map("is_cover")
+  sortOrder Int?      @default(0) @map("sort_order")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("listing_images")
+}
+
+model SavedListing {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  listingId String    @map("listing_id")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, listingId])
+  @@map("saved_listings")
+}
+
+model ListingFlag {
+  id          String    @id @default(cuid())
+  listingId   String    @map("listing_id")
+  flaggedById String    @map("flagged_by")
+  type        String
+  description String?
+  status      String?   @default("open")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  users       User      @relation(fields: [flaggedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([listingId], map: "idx_flags_listing")
+  @@map("listing_flags")
+}
+
+model Verification {
+  id                                        String    @id @default(cuid())
+  listingId                                 String    @unique @map("listing_id")
+  ownerId                                   String    @map("owner_id")
+  l1Status                                  String?   @default("pending") @map("l1_status")
+  l1_doc_coo                                String?
+  l1_doc_title                              String?
+  l1_doc_survey                             String?
+  l1_doc_deed                               String?
+  l1_doc_govcon                             String?
+  l1_submitted_at                           DateTime? @db.Timestamptz(6)
+  l1_reviewed_at                            DateTime? @db.Timestamptz(6)
+  l1_reviewer_id                            String?
+  l1_notes                                  String?
+  l2Status                                  String?   @default("pending") @map("l2_status")
+  l2IdType                                  String?   @map("l2_id_type")
+  l2_id_number                              String?
+  l2_id_doc_url                             String?
+  l2_nin_match                              Boolean?  @default(false)
+  l2_submitted_at                           DateTime? @db.Timestamptz(6)
+  l2_reviewed_at                            DateTime? @db.Timestamptz(6)
+  l2_notes                                  String?
+  l3Status                                  String?   @default("pending") @map("l3_status")
+  l3_qr_code                                String?
+  l3_qr_expires                             DateTime? @db.Timestamptz(6)
+  l3_video_url                              String?
+  l3_submitted_at                           DateTime? @db.Timestamptz(6)
+  l3_reviewed_at                            DateTime? @db.Timestamptz(6)
+  l3_reviewer_id                            String?
+  l3_notes                                  String?
+  l4Status                                  String?   @default("pending") @map("l4_status")
+  l4_agent_id                               String?
+  l4_scheduled_at                           DateTime? @db.Timestamptz(6)
+  l4_completed_at                           DateTime? @db.Timestamptz(6)
+  l4_report_url                             String?
+  l4_notes                                  String?
+  l5Status                                  String?   @default("pending") @map("l5_status")
+  l5_certified_at                           DateTime? @db.Timestamptz(6)
+  l5_admin_id                               String?
+  l5_notes                                  String?
+  currentLayer                              Int?      @default(1) @map("current_layer")
+  overallStatus                             String?   @default("in_progress") @map("overall_status")
+  created_at                                DateTime? @default(now()) @db.Timestamptz(6)
+  updatedAt                                 DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  users_verifications_l1_reviewer_idTousers User?     @relation("verifications_l1_reviewer_idTousers", fields: [l1_reviewer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_verifications_l3_reviewer_idTousers User?     @relation("verifications_l3_reviewer_idTousers", fields: [l3_reviewer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_verifications_l4_agent_idTousers    User?     @relation("verifications_l4_agent_idTousers", fields: [l4_agent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_verifications_l5_admin_idTousers    User?     @relation("verifications_l5_admin_idTousers", fields: [l5_admin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listing                                   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_verifications_owner_idTousers       User      @relation("verifications_owner_idTousers", fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("verifications")
+}
+
+model Conversation {
+  id             String    @id @default(cuid())
+  listingId      String?   @map("listing_id")
+  landlordId     String    @map("landlord_id")
+  tenantId       String    @map("tenant_id")
+  subject        String?
+  lastMessage    String?   @map("last_message")
+  lastMessageAt  DateTime? @map("last_message_at") @db.Timestamptz(6)
+  unreadLandlord Int?      @default(0) @map("unread_landlord")
+  unreadTenant   Int?      @default(0) @map("unread_tenant")
+  is_archived    Boolean?  @default(false)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  status         String?   @default("active")
+  landlord       User      @relation("LandlordConversations", fields: [landlordId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listing        Listing?  @relation(fields: [listingId], references: [id], onUpdate: NoAction)
+  tenant         User      @relation("TenantConversations", fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  messages       Message[]
+
+  @@unique([listingId, tenantId])
+  @@index([landlordId], map: "idx_conversations_landlord")
+  @@index([tenantId], map: "idx_conversations_tenant")
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  senderId       String       @map("sender_id")
+  content        String
+  type           String?      @default("text")
+  attachmentUrl  String?      @map("attachment_url")
+  isRead         Boolean?     @default(false) @map("is_read")
+  readAt         DateTime?    @map("read_at") @db.Timestamptz(6)
+  createdAt      DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([conversationId, createdAt(sort: Desc)], map: "idx_messages_conv")
+  @@index([senderId], map: "idx_messages_sender")
+  @@map("messages")
+}
+
+model Agreement {
+  id                               String               @id @default(cuid())
+  listingId                        String               @map("listing_id")
+  transaction_id                   String?
+  landlordId                       String               @map("landlord_id")
+  tenantId                         String               @map("tenant_id")
+  agentId                          String?              @map("agent_id")
+  type                             String
+  status                           String?              @default("draft")
+  startDate                        DateTime             @map("start_date") @db.Date
+  endDate                          DateTime?            @map("end_date") @db.Date
+  rentAmount                       Decimal?             @map("rent_amount") @db.Decimal(15, 2)
+  rentPeriod                       String?              @map("rent_period")
+  cautionDeposit                   Decimal?             @default(0) @map("caution_deposit") @db.Decimal(15, 2)
+  service_charge                   Decimal?             @default(0) @db.Decimal(15, 2)
+  notice_period_days               Int?                 @default(30)
+  landlordSignedAt                 DateTime?            @map("landlord_signed_at") @db.Timestamptz(6)
+  landlord_ip                      String?
+  tenantSignedAt                   DateTime?            @map("tenant_signed_at") @db.Timestamptz(6)
+  tenant_ip                        String?
+  doc_url                          String?
+  draftPdfUrl                      String?              @map("draft_pdf_url")
+  signedPdfUrl                     String?              @map("signed_pdf_url")
+  documentHash                     String?              @map("document_hash")
+  landlordTokenHash                String?              @map("landlord_token_hash")
+  landlordTokenExpires             DateTime?            @map("landlord_token_expires") @db.Timestamptz(6)
+  tenantTokenHash                  String?              @map("tenant_token_hash")
+  tenantTokenExpires               DateTime?            @map("tenant_token_expires") @db.Timestamptz(6)
+  template_vars                    Json?
+  specialClauses                   String?              @map("special_clauses")
+  createdAt                        DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                        DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  signatures                       AgreementSignature[]
+  users_agreements_agent_idTousers User?                @relation("agreements_agent_idTousers", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  landlord                         User                 @relation("LandlordAgreements", fields: [landlordId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listing                          Listing              @relation(fields: [listingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tenant                           User                 @relation("TenantAgreements", fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transactions                     Transaction?         @relation(fields: [transaction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  disputes                         disputes[]
+  rentSchedule                     RentSchedule[]
+
+  @@index([landlordId], map: "idx_agreements_landlord")
+  @@index([tenantId], map: "idx_agreements_tenant")
+  @@map("agreements")
+}
+
+model AgreementSignature {
+  id          String    @id @default(cuid())
+  agreementId String    @map("agreement_id")
+  signerId    String    @map("signer_id")
+  role        String
+  signedAt    DateTime  @default(now()) @map("signed_at") @db.Timestamptz(6)
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  consentText        String?   @map("consent_text")
+  checksum           String?
+  idType             String?   @map("id_type")
+  idNumberMasked     String?   @map("id_number_masked")
+  verifiedName       String?   @map("verified_name")
+  verifiedDob        String?   @map("verified_dob")
+  dojahRef           String?   @map("dojah_ref")
+  identityVerifiedAt DateTime? @map("identity_verified_at") @db.Timestamptz(6)
+  agreement          Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users       User      @relation(fields: [signerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("agreement_signatures")
+}
+
+model RentSchedule {
+  id            String       @id @default(cuid())
+  agreementId   String       @map("agreement_id")
+  dueDate       DateTime     @map("due_date") @db.Date
+  amount        Decimal      @db.Decimal(15, 2)
+  status        String?      @default("upcoming")
+  transactionId String?      @map("transaction_id")
+  reminderSent  Boolean?     @default(false) @map("reminder_sent")
+  paidAt        DateTime?    @map("paid_at") @db.Timestamptz(6)
+  created_at    DateTime?    @default(now()) @db.Timestamptz(6)
+  agreement     Agreement    @relation(fields: [agreementId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  transactions  Transaction? @relation(fields: [transactionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([dueDate, status], map: "idx_rent_schedule_due")
+  @@map("rent_schedule")
+}
+
+model Transaction {
+  id                                           String         @id @default(cuid())
+  reference                                    String         @unique
+  listingId                                    String?        @map("listing_id")
+  payerId                                      String         @map("payer_id")
+  payeeId                                      String         @map("payee_id")
+  agentId                                      String?        @map("agent_id")
+  type                                         String
+  status                                       String?        @default("pending")
+  amount                                       Decimal        @db.Decimal(15, 2)
+  platformFee                                  Decimal        @map("platform_fee") @db.Decimal(15, 2)
+  agentCommission                              Decimal?       @default(0) @map("agent_commission") @db.Decimal(15, 2)
+  payeeAmount                                  Decimal        @map("payee_amount") @db.Decimal(15, 2)
+  paystack_ref                                 String?
+  paystack_txn_id                              String?
+  escrow_release_date                          DateTime?      @db.Timestamptz(6)
+  escrow_released_at                           DateTime?      @db.Timestamptz(6)
+  escrow_released_by                           String?
+  description                                  String?
+  metadata                                     Json?
+  createdAt                                    DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                    DateTime?      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  agreements                                   Agreement[]
+  disputes                                     disputes[]
+  rent_schedule                                RentSchedule[]
+  users_transactions_agent_idTousers           User?          @relation("transactions_agent_idTousers", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_transactions_escrow_released_byTousers User?          @relation("transactions_escrow_released_byTousers", fields: [escrow_released_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listings                                     Listing?       @relation(fields: [listingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_transactions_payee_idTousers           User           @relation("transactions_payee_idTousers", fields: [payeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_transactions_payer_idTousers           User           @relation("transactions_payer_idTousers", fields: [payerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([payeeId], map: "idx_transactions_payee")
+  @@index([payerId], map: "idx_transactions_payer")
+  @@map("transactions")
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  type      String
+  title     String
+  body      String
+  data      Json?
+  read      Boolean?  @default(false)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, read], map: "idx_notifications_user")
+  @@map("notifications")
+}
+
+model Organisation {
+  id                 String              @id @default(cuid())
+  name               String
+  ownerId            String              @map("owner_id")
+  planTier           String?             @default("starter") @map("plan_tier")
+  maxUnits           Int?                @default(20) @map("max_units")
+  maxSeats           Int?                @default(1) @map("max_seats")
+  billingEmail       String              @map("billing_email")
+  address            String?
+  cacNumber          String?             @map("cac_number")
+  paystackCustomerId String?             @map("paystack_customer_id")
+  logo_url           String?
+  is_active          Boolean?            @default(true)
+  createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  tickets            MaintenanceTicket[]
+  listings           OrgListing[]
+  members            OrgMember[]
+  subscriptions      OrgSubscription[]
+  owner              User                @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("organisations")
+}
+
+model OrgMember {
+  id                                  String       @id @default(cuid())
+  orgId                               String       @map("org_id")
+  userId                              String?      @map("user_id")
+  email                               String
+  role                                String
+  invitedBy                           String?      @map("invited_by")
+  status                              String?      @default("pending")
+  inviteToken                         String?      @unique @map("invite_token")
+  joinedAt                            DateTime?    @map("joined_at") @db.Timestamptz(6)
+  createdAt                           DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  users_org_members_invited_byTousers User?        @relation("org_members_invited_byTousers", fields: [invitedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organisation                        Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user                                User?        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([orgId, email])
+  @@index([orgId], map: "idx_org_members_org")
+  @@index([userId], map: "idx_org_members_user")
+  @@map("org_members")
+}
+
+model OrgListing {
+  id        String       @id @default(cuid())
+  orgId     String       @map("org_id")
+  listingId String       @map("listing_id")
+  added_at  DateTime?    @default(now()) @db.Timestamptz(6)
+  listing   Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  org       Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([orgId, listingId])
+  @@index([orgId], map: "idx_org_listings_org")
+  @@map("org_listings")
+}
+
+model MaintenanceTicket {
+  id                                           String        @id @default(cuid())
+  orgId                                        String?       @map("org_id")
+  listingId                                    String?       @map("listing_id")
+  tenantId                                     String?       @map("tenant_id")
+  raisedBy                                     String        @map("raised_by")
+  title                                        String
+  description                                  String?
+  category                                     String?       @default("other")
+  priority                                     String?       @default("medium")
+  status                                       String?       @default("open")
+  assignedTo                                   String?       @map("assigned_to")
+  photo_urls                                   Json?
+  resolutionNote                               String?       @map("resolution_note")
+  resolvedAt                                   DateTime?     @map("resolved_at") @db.Timestamptz(6)
+  closedAt                                     DateTime?     @map("closed_at") @db.Timestamptz(6)
+  createdAt                                    DateTime?     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                    DateTime?     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  users_maintenance_tickets_assigned_toTousers User?         @relation("maintenance_tickets_assigned_toTousers", fields: [assignedTo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listings                                     Listing?      @relation(fields: [listingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organisation                                 Organisation? @relation(fields: [orgId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_maintenance_tickets_raised_byTousers   User          @relation("maintenance_tickets_raised_byTousers", fields: [raisedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_maintenance_tickets_tenant_idTousers   User?         @relation("maintenance_tickets_tenant_idTousers", fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([orgId], map: "idx_maint_tickets_org")
+  @@index([status], map: "idx_maint_tickets_status")
+  @@map("maintenance_tickets")
+}
+
+model OrgSubscription {
+  id                     String       @id @default(cuid())
+  orgId                  String       @map("org_id")
+  paystackSubId          String?      @unique @map("paystack_sub_id")
+  paystack_customer_code String?
+  plan                   String
+  status                 String?      @default("active")
+  amount                 BigInt?
+  currentPeriodStart     DateTime?    @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd       DateTime?    @map("current_period_end") @db.Timestamptz(6)
+  nextBillingDate        DateTime?    @map("next_billing_date") @db.Timestamptz(6)
+  cancelled_at           DateTime?    @db.Timestamptz(6)
+  createdAt              DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at             DateTime?    @default(now()) @db.Timestamptz(6)
+  organisation           Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("org_subscriptions")
+}
+
+model migrations {
+  version    Int       @id
+  name       String
+  applied_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("_migrations")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model disputes {
+  id                                   String       @id
+  agreement_id                         String?
+  transaction_id                       String?
+  raised_by                            String
+  against                              String
+  assigned_admin                       String?
+  type                                 String
+  status                               String?      @default("open")
+  severity                             Int?         @default(1)
+  description                          String
+  evidence_urls                        Json?
+  resolution_note                      String?
+  amount_disputed                      Decimal?     @db.Decimal(15, 2)
+  resolved_at                          DateTime?    @db.Timestamptz(6)
+  created_at                           DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime?    @default(now()) @db.Timestamptz(6)
+  users_disputes_againstTousers        User         @relation("disputes_againstTousers", fields: [against], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agreements                           Agreement?   @relation(fields: [agreement_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_disputes_assigned_adminTousers User?        @relation("disputes_assigned_adminTousers", fields: [assigned_admin], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_disputes_raised_byTousers      User         @relation("disputes_raised_byTousers", fields: [raised_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transactions                         Transaction? @relation(fields: [transaction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model email_log {
+  id          String    @id
+  to_email    String
+  to_name     String?
+  subject     String
+  template    String?
+  status      String?   @default("queued")
+  provider    String?
+  provider_id String?
+  error       String?
+  sent_at     DateTime? @db.Timestamptz(6)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([status, created_at], map: "idx_email_log_status")
+}
+
+model phone_otps {
+  id         String    @id
+  user_id    String?
+  otp_hash   String
+  expires_at DateTime  @db.Timestamptz(6)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      User?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model refresh_tokens {
+  id         String    @id
+  user_id    String
+  token_hash String
+  expires_at DateTime  @db.Timestamptz(6)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model screening_calls {
+  id                                       String    @id
+  listing_id                               String
+  landlord_id                              String
+  tenant_id                                String
+  agent_id                                 String?
+  status                                   String?   @default("requested")
+  scheduled_at                             DateTime? @db.Timestamptz(6)
+  duration_mins                            Int?
+  notes                                    String?
+  outcome                                  String?
+  created_at                               DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at                               DateTime? @default(now()) @db.Timestamptz(6)
+  users_screening_calls_agent_idTousers    User?     @relation("screening_calls_agent_idTousers", fields: [agent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_screening_calls_landlord_idTousers User      @relation("screening_calls_landlord_idTousers", fields: [landlord_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  listings                                 Listing   @relation(fields: [listing_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_screening_calls_tenant_idTousers   User      @relation("screening_calls_tenant_idTousers", fields: [tenant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

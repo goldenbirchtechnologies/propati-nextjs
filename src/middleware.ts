@@ -1,12 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import createIntlMiddleware from 'next-intl/middleware'
-import { locales, defaultLocale } from './i18n/routing'
-
-const handleI18n = createIntlMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'always',
-})
+import { NextResponse } from 'next/server'
 
 const localePrefix = '/(en|yo|ig|ha|fr)'
 
@@ -43,8 +36,12 @@ export default clerkMiddleware((auth, req) => {
     auth().protect()
   }
 
-  // After Clerk auth is satisfied, run i18n middleware
-  return handleI18n(req)
+  // Redirect bare / to /en
+  if (req.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/en', req.url))
+  }
+
+  return NextResponse.next()
 })
 
 export const config = {

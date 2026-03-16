@@ -13,7 +13,7 @@ export default function SignUpPage() {
           </p>
         </div>
         <SignUp
-          afterSignUpUrl="/en/onboarding"
+          fallbackRedirectUrl="/en/onboarding"
           signInUrl="/en/sign-in"
           appearance={{
             elements: {

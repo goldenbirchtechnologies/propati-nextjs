@@ -3,6 +3,7 @@
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import MobileNav from './MobileNav'
+import TenantModeProvider from '@/components/providers/TenantModeProvider'
 import { useState } from 'react'
 
 interface DashboardShellProps {
@@ -24,7 +25,7 @@ export default function DashboardShell({
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  return (
+  const shell = (
     <div className="flex h-screen overflow-hidden bg-[#f5f3ee]">
       {/* Desktop sidebar */}
       <Sidebar role={role} locale={locale} />
@@ -50,4 +51,11 @@ export default function DashboardShell({
       </div>
     </div>
   )
+
+  // Wrap tenant in mode provider so sidebar + dashboard can share mode state
+  if (role === 'tenant') {
+    return <TenantModeProvider>{shell}</TenantModeProvider>
+  }
+
+  return shell
 }

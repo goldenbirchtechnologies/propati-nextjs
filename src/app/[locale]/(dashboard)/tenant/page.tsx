@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { FileText, CreditCard, MessageSquare, Wrench, Search, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
+import TenantDashboardClient from '@/components/tenant/TenantDashboardClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,12 +24,20 @@ export default async function TenantDashboard({
 
   const dbUser = await prisma.user.findUnique({
     where: { clerkUserId },
-    select: { id: true, fullName: true, profileCompleted: true },
+    select: {
+      id: true,
+      fullName: true,
+      profileCompleted: true,
+      employmentStatus: true,
+      employerName: true,
+      guarantorName: true,
+    },
   })
   if (!dbUser) redirect(`/${params.locale}/onboarding`)
 
   const prefix = `/${params.locale}/tenant`
 
+  // Fetch all stats in parallel
   const [
     activeAgreements,
     pendingAgreements,
@@ -37,6 +45,7 @@ export default async function TenantDashboard({
     openTickets,
     upcomingRent,
     overdueRent,
+    currentHome,
   ] = await Promise.all([
     prisma.agreement.count({ where: { tenantId: dbUser.id, status: 'fully_signed' } }),
     prisma.agreement.count({
@@ -49,18 +58,17 @@ export default async function TenantDashboard({
     prisma.maintenanceTicket.count({
       where: { tenantId: dbUser.id, status: { in: ['open', 'assigned', 'in_progress'] } },
     }),
-    prisma.rentSchedule.findMany({
+    prisma.rentSchedule.findFirst({
       where: {
         agreement: { tenantId: dbUser.id },
         status: 'upcoming',
       },
       include: {
         agreement: {
-          select: { listing: { select: { title: true } } },
+          select: { listing: { select: { title: true, area: true } } },
         },
       },
       orderBy: { dueDate: 'asc' },
-      take: 3,
     }),
     prisma.rentSchedule.count({
       where: {
@@ -68,143 +76,51 @@ export default async function TenantDashboard({
         status: 'overdue',
       },
     }),
+    // Get current active agreement for "Current Home" card
+    prisma.agreement.findFirst({
+      where: { tenantId: dbUser.id, status: 'fully_signed' },
+      include: {
+        listing: { select: { title: true, area: true, state: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
   ])
 
   const unread = unreadMessages._sum.unreadTenant ?? 0
 
-  const kpis = [
-    {
-      label: 'Agreements',
-      value: activeAgreements,
-      sub: pendingAgreements > 0 ? `${pendingAgreements} pending` : 'All signed',
-      icon: FileText,
-      href: `${prefix}/agreements`,
-      color: 'text-teal',
-      bg: 'bg-teal/10',
-    },
-    {
-      label: 'Messages',
-      value: unread,
-      sub: 'unread',
-      icon: MessageSquare,
-      href: `${prefix}/messages`,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-    },
-    {
-      label: 'Maintenance',
-      value: openTickets,
-      sub: 'open tickets',
-      icon: Wrench,
-      href: `${prefix}/maintenance`,
-      color: 'text-rust',
-      bg: 'bg-rust/10',
-    },
-    {
-      label: 'Overdue Rent',
-      value: overdueRent,
-      sub: overdueRent > 0 ? 'Action needed' : 'All clear',
-      icon: AlertTriangle,
-      href: `${prefix}/payments`,
-      color: overdueRent > 0 ? 'text-red-600' : 'text-green-600',
-      bg: overdueRent > 0 ? 'bg-red-50' : 'bg-green-50',
-    },
-  ]
+  // Missing profile fields
+  const missingFields: string[] = []
+  if (!dbUser.employmentStatus) missingFields.push('employment details')
+  if (!dbUser.guarantorName) missingFields.push('guarantor info')
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Home</h1>
-          <p className="text-sm text-muted-foreground">
-            Welcome back, {dbUser.fullName?.split(' ')[0]}
-          </p>
-        </div>
-        <Link
-          href={`${prefix}/search`}
-          className="flex items-center gap-2 rounded-lg bg-teal px-4 py-2 text-sm font-medium text-white hover:bg-teal/90"
-        >
-          <Search className="h-4 w-4" />
-          Find Property
-        </Link>
-      </div>
-
-      {/* Profile completion banner */}
-      {!dbUser.profileCompleted && (
-        <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-yellow-800">Complete your profile</p>
-              <p className="text-sm text-yellow-700">
-                A complete profile improves your chances with landlords
-              </p>
-            </div>
-            <Link
-              href={`${prefix}/profile`}
-              className="rounded-lg bg-yellow-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-yellow-700"
-            >
-              Complete Profile
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon
-          return (
-            <Link
-              key={kpi.label}
-              href={kpi.href}
-              className="rounded-xl border bg-white p-4 transition-shadow hover:shadow-md"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`rounded-lg p-2 ${kpi.bg}`}>
-                  <Icon className={`h-5 w-5 ${kpi.color}`} />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">{kpi.label}</p>
-                  <p className="text-xl font-bold">{kpi.value}</p>
-                  <p className="text-xs text-muted-foreground">{kpi.sub}</p>
-                </div>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-
-      {/* Upcoming rent */}
-      <div className="rounded-xl border bg-white">
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="font-semibold">Upcoming Rent</h2>
-          <Link href={`${prefix}/payments`} className="text-sm text-teal hover:underline">
-            View all
-          </Link>
-        </div>
-        {upcomingRent.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            <CreditCard className="mx-auto h-10 w-10 text-muted-foreground/40" />
-            <p className="mt-2">No upcoming rent payments</p>
-          </div>
-        ) : (
-          <div className="divide-y">
-            {upcomingRent.map((schedule) => (
-              <div key={schedule.id} className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-medium">{schedule.agreement.listing.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Due {new Date(schedule.dueDate).toLocaleDateString('en-NG', {
-                      day: 'numeric', month: 'short', year: 'numeric',
-                    })}
-                  </p>
-                </div>
-                <p className="text-lg font-bold text-teal">₦{Number(schedule.amount).toLocaleString()}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <TenantDashboardClient
+      fullName={dbUser.fullName}
+      profileCompleted={dbUser.profileCompleted ?? false}
+      missingFields={missingFields}
+      prefix={prefix}
+      locale={params.locale}
+      stats={{
+        activeAgreements,
+        pendingAgreements,
+        unreadMessages: unread,
+        openTickets,
+        overdueRent,
+      }}
+      currentHome={
+        currentHome
+          ? { title: currentHome.listing.title, area: `${currentHome.listing.area}, ${currentHome.listing.state}` }
+          : null
+      }
+      nextPayment={
+        upcomingRent
+          ? {
+              amount: Number(upcomingRent.amount),
+              dueDate: upcomingRent.dueDate.toISOString(),
+              listing: upcomingRent.agreement.listing.title,
+            }
+          : null
+      }
+    />
   )
 }

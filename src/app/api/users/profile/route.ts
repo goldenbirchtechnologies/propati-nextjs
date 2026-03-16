@@ -14,8 +14,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
 
     // Build update data only with fields present in the body
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: Record<string, any> = {}
+    const data: Record<string, unknown> = {}
 
     if (body.fullName !== undefined) data.fullName = body.fullName
     if (body.phone !== undefined) data.phone = body.phone

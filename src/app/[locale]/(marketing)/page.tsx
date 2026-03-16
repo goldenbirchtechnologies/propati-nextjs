@@ -26,61 +26,66 @@ export default async function HomePage({
   const activeType = searchParams.type ?? ''
   const query = searchParams.q ?? ''
 
-  const where: any = { status: 'active' }
-  if (activeType) where.listingType = activeType
-  if (query) {
-    where.OR = [
-      { title: { contains: query, mode: 'insensitive' } },
-      { address: { contains: query, mode: 'insensitive' } },
-      { area: { contains: query, mode: 'insensitive' } },
-    ]
-  }
+  let listings: any[] = []
+  try {
+    const where: any = { status: 'active' }
+    if (activeType) where.listingType = activeType
+    if (query) {
+      where.OR = [
+        { title: { contains: query, mode: 'insensitive' } },
+        { address: { contains: query, mode: 'insensitive' } },
+        { area: { contains: query, mode: 'insensitive' } },
+      ]
+    }
 
-  const rawListings = await prisma.listing.findMany({
-    where,
-    include: {
-      images: {
-        orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }],
-        take: 3,
+    const rawListings = await prisma.listing.findMany({
+      where,
+      include: {
+        images: {
+          orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }],
+          take: 3,
+        },
+        owner: { select: { id: true, fullName: true, avatarUrl: true } },
       },
-      owner: { select: { id: true, fullName: true, avatarUrl: true } },
-    },
-    orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
-    take: 24,
-  })
+      orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+      take: 24,
+    })
 
-  // Explicitly convert Prisma Decimal/Date/Json to plain JS values
-  const listings = rawListings.map((l) => ({
-    id: l.id,
-    title: l.title,
-    description: l.description ?? null,
-    listingType: l.listingType,
-    propertyType: l.propertyType,
-    address: l.address,
-    area: l.area,
-    state: l.state,
-    price: Number(l.price),
-    pricePeriod: l.pricePeriod ?? null,
-    bedrooms: l.bedrooms ?? null,
-    bathrooms: l.bathrooms ?? null,
-    sizeSqm: l.sizeSqm ? Number(l.sizeSqm) : null,
-    furnished: l.furnished ?? false,
-    amenities: l.amenities ? (l.amenities as string[]) : null,
-    status: l.status ?? 'draft',
-    isFeatured: l.isFeatured ?? false,
-    verificationTier: l.verificationTier ?? 'none',
-    viewsCount: l.viewsCount ?? 0,
-    createdAt: l.createdAt ? l.createdAt.toISOString() : new Date().toISOString(),
-    images: (l.images ?? []).map((img) => ({
-      id: img.id,
-      url: img.url,
-      isCover: img.isCover,
-      sortOrder: img.sortOrder,
-    })),
-    owner: l.owner
-      ? { id: l.owner.id, fullName: l.owner.fullName, avatarUrl: l.owner.avatarUrl ?? null }
-      : null,
-  }))
+    // Explicitly convert Prisma Decimal/Date/Json to plain JS values
+    listings = rawListings.map((l) => ({
+      id: l.id,
+      title: l.title,
+      description: l.description ?? null,
+      listingType: l.listingType,
+      propertyType: l.propertyType,
+      address: l.address,
+      area: l.area,
+      state: l.state,
+      price: Number(l.price),
+      pricePeriod: l.pricePeriod ?? null,
+      bedrooms: l.bedrooms ?? null,
+      bathrooms: l.bathrooms ?? null,
+      sizeSqm: l.sizeSqm ? Number(l.sizeSqm) : null,
+      furnished: l.furnished ?? false,
+      amenities: l.amenities ? (l.amenities as string[]) : null,
+      status: l.status ?? 'draft',
+      isFeatured: l.isFeatured ?? false,
+      verificationTier: l.verificationTier ?? 'none',
+      viewsCount: l.viewsCount ?? 0,
+      createdAt: l.createdAt ? l.createdAt.toISOString() : new Date().toISOString(),
+      images: (l.images ?? []).map((img) => ({
+        id: img.id,
+        url: img.url,
+        isCover: img.isCover,
+        sortOrder: img.sortOrder,
+      })),
+      owner: l.owner
+        ? { id: l.owner.id, fullName: l.owner.fullName, avatarUrl: l.owner.avatarUrl ?? null }
+        : null,
+    }))
+  } catch (error) {
+    console.error('Failed to fetch listings:', error)
+  }
 
   return (
     <main className="min-h-screen bg-[#f5f3ee]">

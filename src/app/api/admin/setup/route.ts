@@ -5,10 +5,11 @@ import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 /**
- * One-time admin setup endpoint.
+ * Admin setup endpoint.
  * Call POST /api/admin/setup with { "secret": "PROPATI_ADMIN_2026" }
  * while signed in with the account you want to make admin.
  *
+ * If an existing admin exists, they will be demoted to 'tenant'.
  * Delete this file after your admin account is set up.
  */
 export async function POST(req: NextRequest) {
@@ -32,19 +33,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User not found in database. Complete onboarding first.' }, { status: 404 })
     }
 
-    // Check if there's already an admin
-    const existingAdmin = await prisma.user.findFirst({
-      where: { role: 'admin' },
-      select: { email: true },
-    })
-
-    if (existingAdmin) {
-      return NextResponse.json({
-        error: `An admin already exists (${existingAdmin.email}). Only one admin setup allowed via this endpoint.`,
-      }, { status: 409 })
+    if (user.role === 'admin') {
+      return NextResponse.json({ message: `${user.email} is already an admin.` })
     }
 
-    // Promote to admin
+    // Demote any existing admin(s) back to tenant
+    await prisma.user.updateMany({
+      where: { role: 'admin' },
+      data: { role: 'tenant' },
+    })
+
+    // Promote current user to admin
     await prisma.user.update({
       where: { id: user.id },
       data: { role: 'admin' },
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${user.fullName} (${user.email}) is now an admin. Navigate to /en/admin to access the dashboard. DELETE this setup file after use.`,
+      message: `${user.fullName} (${user.email}) is now the admin. Any previous admin has been demoted. Navigate to /en/admin to access the dashboard.`,
     })
   } catch (error) {
     console.error('Admin setup error:', error)

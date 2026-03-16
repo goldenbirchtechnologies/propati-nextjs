@@ -49,8 +49,38 @@ export default async function HomePage({
     take: 24,
   })
 
-  // Serialize Prisma objects (Decimal, Date, BigInt) to plain JSON
-  const listings = JSON.parse(JSON.stringify(rawListings))
+  // Explicitly convert Prisma Decimal/Date/Json to plain JS values
+  const listings = rawListings.map((l) => ({
+    id: l.id,
+    title: l.title,
+    description: l.description ?? null,
+    listingType: l.listingType,
+    propertyType: l.propertyType,
+    address: l.address,
+    area: l.area,
+    state: l.state,
+    price: Number(l.price),
+    pricePeriod: l.pricePeriod ?? null,
+    bedrooms: l.bedrooms ?? null,
+    bathrooms: l.bathrooms ?? null,
+    sizeSqm: l.sizeSqm ? Number(l.sizeSqm) : null,
+    furnished: l.furnished ?? false,
+    amenities: l.amenities ? (l.amenities as string[]) : null,
+    status: l.status ?? 'draft',
+    isFeatured: l.isFeatured ?? false,
+    verificationTier: l.verificationTier ?? 'none',
+    viewsCount: l.viewsCount ?? 0,
+    createdAt: l.createdAt ? l.createdAt.toISOString() : new Date().toISOString(),
+    images: (l.images ?? []).map((img) => ({
+      id: img.id,
+      url: img.url,
+      isCover: img.isCover,
+      sortOrder: img.sortOrder,
+    })),
+    owner: l.owner
+      ? { id: l.owner.id, fullName: l.owner.fullName, avatarUrl: l.owner.avatarUrl ?? null }
+      : null,
+  }))
 
   return (
     <main className="min-h-screen bg-[#f5f3ee]">

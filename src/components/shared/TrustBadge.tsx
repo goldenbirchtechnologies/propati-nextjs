@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from '@/lib/utils'
 
 const tierConfig: Record<string, { label: string; className: string }> = {

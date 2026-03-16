@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Building2, Eye, UserPlus, UserMinus } from 'lucide-react'
 import TrustBadge from '@/components/shared/TrustBadge'
-import { AssignAgentModal } from './AssignAgentModal'
+import AssignAgentModal from './AssignAgentModal'
 
 interface ListingData {
   id: string

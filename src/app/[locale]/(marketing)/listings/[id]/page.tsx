@@ -4,7 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatNaira } from '@/lib/utils'
 import TrustBadge from '@/components/shared/TrustBadge'
-import { MapPin, Bed, Bath, Maximize, Car, Building2, Sofa, ArrowLeft } from 'lucide-react'
+import { ListingCTA } from '@/components/listings/ListingCTA'
+import { MapPin, Bed, Bath, Maximize, Car, Building2, Sofa, ArrowLeft, Shield, User as UserIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -52,6 +53,7 @@ export default async function ListingDetailPage({ params }: Props) {
     include: {
       images: { orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }] },
       owner: { select: { id: true, fullName: true, avatarUrl: true, phone: true } },
+      agent: { select: { id: true, fullName: true, avatarUrl: true, phone: true, agentBio: true } },
     },
   })
 
@@ -233,44 +235,114 @@ export default async function ListingDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Sidebar — pricing + owner */}
+          {/* Sidebar — pricing + owner + CTA */}
           <div className="lg:col-span-1">
-            <div className="sticky top-4 rounded-xl border bg-white p-5 shadow-sm">
-              <p className="font-display text-2xl font-bold text-gold">
-                {formatNaira(Number(listing.price))}
-              </p>
-              {listing.pricePeriod && (
-                <p className="text-sm text-muted-foreground">
-                  {periodLabel[listing.pricePeriod] ?? listing.pricePeriod}
+            <div className="sticky top-4 space-y-4">
+              {/* Pricing Card */}
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="font-display text-2xl font-bold text-gold">
+                  {formatNaira(Number(listing.price))}
                 </p>
-              )}
+                {listing.pricePeriod && (
+                  <p className="text-sm text-muted-foreground">
+                    {periodLabel[listing.pricePeriod] ?? listing.pricePeriod}
+                  </p>
+                )}
 
-              {listing.cautionDeposit && (
-                <p className="mt-2 text-sm">
-                  <span className="text-muted-foreground">Caution deposit:</span>{' '}
-                  {formatNaira(Number(listing.cautionDeposit))}
-                </p>
-              )}
-              {listing.serviceCharge && (
-                <p className="mt-1 text-sm">
-                  <span className="text-muted-foreground">Service charge:</span>{' '}
-                  {formatNaira(Number(listing.serviceCharge))}
-                </p>
-              )}
+                {listing.cautionDeposit && (
+                  <p className="mt-2 text-sm">
+                    <span className="text-muted-foreground">Caution deposit:</span>{' '}
+                    {formatNaira(Number(listing.cautionDeposit))}
+                  </p>
+                )}
+                {listing.serviceCharge && (
+                  <p className="mt-1 text-sm">
+                    <span className="text-muted-foreground">Service charge:</span>{' '}
+                    {formatNaira(Number(listing.serviceCharge))}
+                  </p>
+                )}
 
-              {/* Owner */}
-              <div className="mt-5 border-t pt-4">
-                <p className="text-xs text-muted-foreground">Listed by</p>
-                <p className="mt-1 font-semibold">{listing.owner.fullName}</p>
+                {/* Listing type badge */}
+                <div className="mt-3">
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-white ${
+                    listing.listingType === 'sale' ? 'bg-gold' :
+                    listing.listingType === 'short-let' ? 'bg-rust' :
+                    listing.listingType === 'share' ? 'bg-blue-600' :
+                    'bg-teal'
+                  }`}>
+                    {listing.listingType === 'sale' ? 'For Sale' :
+                     listing.listingType === 'short-let' ? 'Short-let' :
+                     listing.listingType === 'share' ? 'Room Share' :
+                     'For Rent'}
+                  </span>
+                </div>
+
+                {/* CTA */}
+                <div className="mt-5 border-t pt-4">
+                  <ListingCTA
+                    listingId={listing.id}
+                    listingType={listing.listingType}
+                    ownerId={listing.owner.id}
+                    ownerName={listing.owner.fullName}
+                    locale={params.locale}
+                  />
+                </div>
               </div>
 
-              {/* CTA */}
-              <Link
-                href={`${prefix}/sign-in`}
-                className="mt-4 block w-full rounded-lg bg-gold py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-gold/90"
-              >
-                Sign in to Apply
-              </Link>
+              {/* Owner Card */}
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Listed by</p>
+                <div className="mt-2 flex items-center gap-3">
+                  {listing.owner.avatarUrl ? (
+                    <Image
+                      src={listing.owner.avatarUrl}
+                      alt={listing.owner.fullName}
+                      width={40}
+                      height={40}
+                      className="rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10">
+                      <UserIcon className="h-5 w-5 text-gold" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold">{listing.owner.fullName}</p>
+                    <p className="text-xs text-muted-foreground">Property Owner</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agent Card (if assigned) */}
+              {listing.agent && (
+                <div className="rounded-xl border border-teal/20 bg-teal/5 p-5 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-teal" />
+                    <p className="text-xs font-medium uppercase tracking-wide text-teal">Managed by Agent</p>
+                  </div>
+                  <div className="mt-2 flex items-center gap-3">
+                    {listing.agent.avatarUrl ? (
+                      <Image
+                        src={listing.agent.avatarUrl}
+                        alt={listing.agent.fullName}
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal/10">
+                        <UserIcon className="h-5 w-5 text-teal" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold">{listing.agent.fullName}</p>
+                      {listing.agent.agentBio && (
+                        <p className="text-xs text-muted-foreground line-clamp-2">{listing.agent.agentBio}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

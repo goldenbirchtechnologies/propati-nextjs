@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { Building2, Eye, PlusCircle } from 'lucide-react'
+import { Building2, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
-import TrustBadge from '@/components/shared/TrustBadge'
+import { LandlordListingCard } from '@/components/listings/LandlordListingCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,14 +39,35 @@ export default async function LandlordListings({
     where.status = statusFilter
   }
 
-  const listings = await prisma.listing.findMany({
+  const rawListings = await prisma.listing.findMany({
     where,
     include: {
       images: { orderBy: [{ isCover: 'desc' }, { sortOrder: 'asc' }], take: 1 },
+      agent: { select: { id: true, fullName: true, email: true } },
       _count: { select: { agreements: true, savedBy: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  // Serialize for client component (convert Decimal/Date)
+  const listings = rawListings.map((l) => ({
+    id: l.id,
+    title: l.title,
+    area: l.area,
+    state: l.state,
+    price: Number(l.price),
+    pricePeriod: l.pricePeriod,
+    status: l.status,
+    verificationTier: l.verificationTier,
+    viewsCount: l.viewsCount ?? 0,
+    bedrooms: l.bedrooms,
+    bathrooms: l.bathrooms,
+    sizeSqm: l.sizeSqm ? Number(l.sizeSqm) : null,
+    imageUrl: l.images[0]?.url ?? null,
+    savedCount: l._count.savedBy,
+    agreementCount: l._count.agreements,
+    agent: l.agent ? { id: l.agent.id, fullName: l.agent.fullName, email: l.agent.email } : null,
+  }))
 
   const statuses = ['all', 'active', 'draft', 'suspended']
 
@@ -55,7 +76,9 @@ export default async function LandlordListings({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">My Properties</h1>
-          <p className="text-sm text-muted-foreground">{listings.length} listing{listings.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-muted-foreground">
+            {listings.length} listing{listings.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <Link
           href={`${prefix}/listings/new`}
@@ -101,84 +124,11 @@ export default async function LandlordListings({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing) => (
-            <div key={listing.id} className="overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-md">
-              {/* Image */}
-              <div className="relative aspect-[16/10] bg-muted">
-                {listing.images[0] ? (
-                  <img
-                    src={listing.images[0].url}
-                    alt={listing.title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Building2 className="h-10 w-10 text-muted-foreground/40" />
-                  </div>
-                )}
-                {/* Status badge */}
-                <span
-                  className={`absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    listing.status === 'active'
-                      ? 'bg-green-500 text-white'
-                      : listing.status === 'draft'
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-gray-500 text-white'
-                  }`}
-                >
-                  {listing.status}
-                </span>
-                {listing.verificationTier && listing.verificationTier !== 'none' && (
-                  <div className="absolute right-3 top-3">
-                    <TrustBadge tier={listing.verificationTier} />
-                  </div>
-                )}
-              </div>
-
-              {/* Details */}
-              <div className="p-4">
-                <h3 className="truncate font-semibold">{listing.title}</h3>
-                <p className="mt-0.5 text-sm text-muted-foreground">{listing.area}, {listing.state}</p>
-                <p className="mt-2 text-lg font-bold text-gold">
-                  ₦{Number(listing.price).toLocaleString()}
-                  {listing.pricePeriod && (
-                    <span className="text-sm font-normal text-muted-foreground">/{listing.pricePeriod}</span>
-                  )}
-                </p>
-
-                {/* Stats */}
-                <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-3.5 w-3.5" />
-                    {listing.viewsCount ?? 0} views
-                  </span>
-                  <span>{listing._count.savedBy} saved</span>
-                  <span>{listing._count.agreements} agreement{listing._count.agreements !== 1 ? 's' : ''}</span>
-                </div>
-
-                {/* Property details */}
-                <div className="mt-3 flex gap-3 text-xs text-muted-foreground">
-                  {listing.bedrooms != null && <span>{listing.bedrooms} bed</span>}
-                  {listing.bathrooms != null && <span>{listing.bathrooms} bath</span>}
-                  {listing.sizeSqm != null && <span>{Number(listing.sizeSqm)} sqm</span>}
-                </div>
-
-                {/* Actions */}
-                <div className="mt-4 flex gap-2">
-                  <Link
-                    href={`/${params.locale}/listings/${listing.id}`}
-                    className="flex-1 rounded-lg border px-3 py-1.5 text-center text-xs font-medium hover:bg-muted"
-                  >
-                    View
-                  </Link>
-                  <Link
-                    href={`${prefix}/listings/${listing.id}/edit`}
-                    className="flex-1 rounded-lg bg-gold/10 px-3 py-1.5 text-center text-xs font-medium text-gold hover:bg-gold/20"
-                  >
-                    Edit
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <LandlordListingCard
+              key={listing.id}
+              listing={listing}
+              locale={params.locale}
+            />
           ))}
         </div>
       )}

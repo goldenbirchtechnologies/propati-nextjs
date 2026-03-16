@@ -20,29 +20,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
-    // Get Clerk user info for creating DB record if needed
-    const clerkUser = await currentUser()
-
-    // Upsert: create user if webhook hasn't fired yet, or update if exists
-    await prisma.user.upsert({
+    // Check if user already exists in DB
+    const existingUser = await prisma.user.findUnique({
       where: { clerkUserId: userId },
-      update: { role },
-      create: {
-        clerkUserId: userId,
-        email: clerkUser?.emailAddresses?.[0]?.emailAddress ?? '',
-        fullName: `${clerkUser?.firstName ?? ''} ${clerkUser?.lastName ?? ''}`.trim() || 'User',
-        phone: clerkUser?.phoneNumbers?.[0]?.phoneNumber ?? null,
-        role,
-        password: 'clerk_managed',
-      },
     })
+
+    if (existingUser) {
+      // Update role
+      await prisma.user.update({
+        where: { clerkUserId: userId },
+        data: { role },
+      })
+    } else {
+      // User doesn't exist yet (webhook hasn't fired) — create them
+      let email = ''
+      let fullName = 'User'
+      let phone: string | null = null
+
+      try {
+        const clerkUser = await currentUser()
+        if (clerkUser) {
+          email = clerkUser.emailAddresses?.[0]?.emailAddress ?? ''
+          fullName = `${clerkUser.firstName ?? ''} ${clerkUser.lastName ?? ''}`.trim() || 'User'
+          phone = clerkUser.phoneNumbers?.[0]?.phoneNumber ?? null
+        }
+      } catch {
+        // currentUser() may fail — proceed with defaults
+      }
+
+      await prisma.user.create({
+        data: {
+          clerkUserId: userId,
+          email,
+          fullName,
+          phone,
+          role,
+          password: 'clerk_managed',
+        },
+      })
+    }
 
     return NextResponse.json({ success: true, role })
   } catch (error) {
     console.error('Onboarding error:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Server error' },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Server error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import ListingCard from '@/components/listings/ListingCard'
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
 
@@ -57,7 +58,8 @@ export default async function HomePage({
             <span className="text-gold">P</span>ROPATI
           </span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher variant="dark" />
           <Link
             href={`/${locale}/sign-in`}
             className="rounded-full px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"

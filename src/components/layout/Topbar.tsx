@@ -2,6 +2,7 @@
 
 import { UserButton } from '@clerk/nextjs'
 import { Menu } from 'lucide-react'
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher'
 
 interface TopbarProps {
   fullName: string
@@ -31,15 +32,18 @@ export default function Topbar({ fullName, onMenuClick }: TopbarProps) {
       {/* Mobile logo */}
       <span className="font-display text-lg font-bold text-gold md:hidden">PROPATI</span>
 
-      {/* User button */}
-      <UserButton
-        afterSignOutUrl="/"
-        appearance={{
-          elements: {
-            avatarBox: 'h-8 w-8',
-          },
-        }}
-      />
+      {/* Language + User */}
+      <div className="flex items-center gap-2">
+        <LanguageSwitcher variant="light" />
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: 'h-8 w-8',
+            },
+          }}
+        />
+      </div>
     </header>
   )
 }

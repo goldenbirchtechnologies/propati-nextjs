@@ -76,7 +76,7 @@ export default async function HomePage({
       verificationTier: l.verificationTier ?? 'none',
       viewsCount: l.viewsCount ?? 0,
       createdAt: l.createdAt ? l.createdAt.toISOString() : new Date().toISOString(),
-      images: (l.images ?? []).map((img) => ({
+      images: (l.images ?? []).map((img: any) => ({
         id: img.id,
         url: img.url,
         isCover: img.isCover,

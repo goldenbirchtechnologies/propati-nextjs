@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         email: email_addresses[0]?.email_address ?? '',
         phone: phone_numbers?.[0]?.phone_number ?? null,
         fullName: `${first_name ?? ''} ${last_name ?? ''}`.trim() || 'User',
-        role: (public_metadata?.role as any) ?? 'tenant',
+        role: (public_metadata?.role as string) || 'pending',
         password: 'clerk_managed', // Placeholder — auth handled by Clerk, not password
       },
     })

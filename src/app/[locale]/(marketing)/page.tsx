@@ -50,8 +50,31 @@ export default async function HomePage({
 
   return (
     <main className="min-h-screen bg-[#f5f3ee]">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 flex items-center justify-between bg-[#1a1a1a]/95 px-4 py-3 backdrop-blur-sm md:px-8">
+        <Link href={`/${locale}`} className="flex items-center gap-1">
+          <span className="font-display text-xl font-bold text-white">
+            <span className="text-gold">P</span>ROPATI
+          </span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/${locale}/sign-in`}
+            className="rounded-full px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"
+          >
+            Sign In
+          </Link>
+          <Link
+            href={`/${locale}/sign-up`}
+            className="rounded-full bg-gold px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gold/90"
+          >
+            Get Started
+          </Link>
+        </div>
+      </nav>
+
       {/* Hero */}
-      <section className="relative bg-gradient-to-b from-[#1a1a1a] to-[#2d2418] px-4 pb-16 pt-20 text-center text-white">
+      <section className="relative bg-gradient-to-b from-[#1a1a1a] to-[#2d2418] px-4 pb-16 pt-16 text-center text-white">
         <p className="mx-auto mb-2 inline-block rounded-full border border-gold/40 bg-gold/10 px-4 py-1 text-xs font-medium tracking-wide text-gold">
           Nigeria&apos;s most trusted property marketplace
         </p>

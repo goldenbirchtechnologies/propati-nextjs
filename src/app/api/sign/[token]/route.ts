@@ -6,6 +6,8 @@ import { sendSignedAgreementEmail } from '@/lib/resend'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
   // Return basic info for the signing page to validate the token
   return NextResponse.json({ success: true, message: 'Use POST to submit signature' })

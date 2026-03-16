@@ -2,6 +2,8 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_ROLES = ['landlord', 'tenant', 'agent', 'estate_manager']
 
 export async function POST(request: NextRequest) {

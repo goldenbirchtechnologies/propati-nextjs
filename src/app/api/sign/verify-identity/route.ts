@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdentity, maskId } from '@/lib/dojah'
 import type { DojahIdType } from '@/lib/dojah'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const { idType, idNumber } = await request.json()

@@ -5,6 +5,8 @@ import { initializeTransaction } from '@/lib/paystack'
 import { computeFees } from '@/lib/fees'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireDbUser()

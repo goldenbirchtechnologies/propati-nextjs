@@ -7,6 +7,8 @@ import { sendAgreementSigningEmail } from '@/lib/resend'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireRole('landlord', 'agent', 'admin')

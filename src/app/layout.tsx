@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
+import QueryProvider from '@/components/providers/QueryProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -37,7 +38,9 @@ export default function RootLayout({
             rel="stylesheet"
           />
         </head>
-        <body className="font-sans antialiased">{children}</body>
+        <body className="font-sans antialiased">
+          <QueryProvider>{children}</QueryProvider>
+        </body>
       </html>
     </ClerkProvider>
   )

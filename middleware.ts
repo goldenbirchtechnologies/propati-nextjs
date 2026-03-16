@@ -24,7 +24,20 @@ const isPublicRoute = createRouteMatcher([
   '/onboarding(.*)',
 ])
 
+const isAuthPage = createRouteMatcher([
+  '/sign-in(.*)', '/sign-up(.*)',
+  `${localePrefix}/sign-in(.*)`, `${localePrefix}/sign-up(.*)`,
+])
+
 export default clerkMiddleware((auth, req) => {
+  const { userId } = auth()
+
+  // Redirect signed-in users away from sign-in/sign-up pages
+  if (userId && isAuthPage(req)) {
+    const locale = req.nextUrl.pathname.match(/^\/(en|yo|ig|ha|fr)/)?.[1] ?? 'en'
+    return Response.redirect(new URL(`/${locale}/onboarding`, req.url))
+  }
+
   // Only protect non-public routes — Clerk will redirect to sign-in
   if (!isPublicRoute(req)) {
     auth().protect()

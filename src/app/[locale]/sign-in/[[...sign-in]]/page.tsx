@@ -13,6 +13,8 @@ export default function SignInPage() {
           </p>
         </div>
         <SignIn
+          afterSignInUrl="/en/onboarding"
+          signUpUrl="/en/sign-up"
           appearance={{
             elements: {
               rootBox: 'mx-auto w-full',

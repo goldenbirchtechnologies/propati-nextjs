@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { headers, cookies } from 'next/headers'
+import { headers } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import DashboardShell from '@/components/layout/DashboardShell'
 
@@ -12,20 +13,11 @@ export default async function DashboardLayout({
   children: React.ReactNode
   params: { locale: string }
 }) {
-  // The middleware's auth().protect() ensures only authenticated users reach here.
-  // We get the userId from Clerk's session cookie / header.
   let userId: string | null = null
   try {
-    const { auth } = require('@clerk/nextjs/server')
-    userId = auth().userId
+    const session = auth()
+    userId = session.userId
   } catch {
-    // If Clerk context isn't available (intl middleware conflict), try the cookie
-    const cookieStore = cookies()
-    const sessionCookie = cookieStore.get('__session')
-    if (!sessionCookie) {
-      redirect(`/${params.locale}/sign-in`)
-    }
-    // Can't decode Clerk session without auth() — redirect to sign-in
     redirect(`/${params.locale}/sign-in`)
   }
 

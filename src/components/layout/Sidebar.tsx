@@ -8,7 +8,7 @@ import {
   Home, Building2, PlusCircle, FileText, MessageSquare,
   Shield, User, CreditCard, Search, Wrench, Users,
   BarChart3, Upload, Flag, AlertTriangle, DollarSign,
-  Phone, LogOut,
+  Phone, LogOut, Heart, Receipt, Wallet,
 } from 'lucide-react'
 
 interface NavItem {
@@ -26,14 +26,17 @@ const roleNavItems: Record<string, NavItem[]> = {
     { label: 'Messages', href: '/messages', icon: MessageSquare },
     { label: 'Screening', href: '/screening', icon: Phone },
     { label: 'Rent Collection', href: '/rent', icon: CreditCard },
+    { label: 'Withdrawals', href: '/withdrawals', icon: Wallet },
     { label: 'Verify Property', href: '/verify', icon: Shield },
     { label: 'Profile', href: '/profile', icon: User },
   ],
   tenant: [
     { label: 'Home', href: '', icon: Home },
     { label: 'Find Property', href: '/search', icon: Search },
+    { label: 'Saved', href: '/saved', icon: Heart },
     { label: 'Agreements', href: '/agreements', icon: FileText },
     { label: 'Payments', href: '/payments', icon: CreditCard },
+    { label: 'Receipts', href: '/receipts', icon: Receipt },
     { label: 'Maintenance', href: '/maintenance', icon: Wrench },
     { label: 'Messages', href: '/messages', icon: MessageSquare },
     { label: 'Profile', href: '/profile', icon: User },
@@ -43,6 +46,7 @@ const roleNavItems: Record<string, NavItem[]> = {
     { label: 'Listings', href: '/listings', icon: Building2 },
     { label: 'Pipeline', href: '/pipeline', icon: BarChart3 },
     { label: 'Commissions', href: '/commissions', icon: DollarSign },
+    { label: 'Withdrawals', href: '/withdrawals', icon: Wallet },
     { label: 'Messages', href: '/messages', icon: MessageSquare },
     { label: 'Profile', href: '/profile', icon: User },
   ],

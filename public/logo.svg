@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <!-- Blue rounded square icon -->
+  <rect x="0" y="4" width="40" height="40" rx="10" fill="#2563EB"/>
+  <!-- White diamond -->
+  <rect x="12" y="16" width="16" height="16" rx="3" transform="rotate(45 20 24)" fill="white"/>
+  <!-- PROPATI text -->
+  <text x="52" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800" fill="#2563EB" letter-spacing="0.5">PROPATI</text>
+</svg>

@@ -3,6 +3,8 @@ import ListingCard from '@/components/listings/ListingCard'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const LISTING_TYPES = [
   { value: '', label: 'All' },
   { value: 'rent', label: 'Rent' },

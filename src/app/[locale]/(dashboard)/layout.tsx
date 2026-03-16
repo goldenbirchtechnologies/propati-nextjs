@@ -3,6 +3,8 @@ import { headers, cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import DashboardShell from '@/components/layout/DashboardShell'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardLayout({
   children,
   params,

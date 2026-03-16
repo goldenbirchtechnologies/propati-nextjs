@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import SigningForm from './SigningForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SigningPage({
   params,
   searchParams,

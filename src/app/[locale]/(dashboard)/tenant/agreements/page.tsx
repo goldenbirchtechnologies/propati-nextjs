@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { FileText, Clock, CheckCircle2, AlertCircle, PenLine } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 async function getAuthUserId() {
   try {
     const { auth } = require('@clerk/nextjs/server')

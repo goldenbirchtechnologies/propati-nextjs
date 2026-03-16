@@ -9,6 +9,8 @@ import {
   Shield,
 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 async function getAuthUserId() {
   try {
     const { auth } = require('@clerk/nextjs/server')

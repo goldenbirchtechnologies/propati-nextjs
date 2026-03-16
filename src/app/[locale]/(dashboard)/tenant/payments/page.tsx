@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { CreditCard, CheckCircle2, Clock, AlertTriangle } from 'lucide-react'
 import { PayRentButton } from '@/components/payments/PayRentButton'
 
+export const dynamic = 'force-dynamic'
+
 async function getAuthUserId() {
   try {
     const { auth } = require('@clerk/nextjs/server')

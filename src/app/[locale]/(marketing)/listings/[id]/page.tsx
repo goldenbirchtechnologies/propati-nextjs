@@ -7,6 +7,8 @@ import TrustBadge from '@/components/shared/TrustBadge'
 import { MapPin, Bed, Bath, Maximize, Car, Building2, Sofa, ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: { id: string; locale: string }
 }

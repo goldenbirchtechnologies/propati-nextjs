@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import MessagingPage from '@/components/messaging/MessagingPage'
 
+export const dynamic = 'force-dynamic'
+
 async function getAuthUserId() {
   try {
     const { auth } = require('@clerk/nextjs/server')

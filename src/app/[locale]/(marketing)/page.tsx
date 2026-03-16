@@ -36,7 +36,7 @@ export default async function HomePage({
     ]
   }
 
-  const listings = await prisma.listing.findMany({
+  const rawListings = await prisma.listing.findMany({
     where,
     include: {
       images: {
@@ -48,6 +48,9 @@ export default async function HomePage({
     orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
     take: 24,
   })
+
+  // Serialize Prisma objects (Decimal, Date, BigInt) to plain JSON
+  const listings = JSON.parse(JSON.stringify(rawListings))
 
   return (
     <main className="min-h-screen bg-[#f5f3ee]">

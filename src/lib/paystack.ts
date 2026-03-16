@@ -1,12 +1,18 @@
-import axios from 'axios'
+import axios, { type AxiosInstance } from 'axios'
 
-const paystack = axios.create({
-  baseURL: 'https://api.paystack.co',
-  headers: {
-    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-    'Content-Type': 'application/json',
-  },
-})
+let _paystack: AxiosInstance | null = null
+function getPaystack() {
+  if (!_paystack) {
+    _paystack = axios.create({
+      baseURL: 'https://api.paystack.co',
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    })
+  }
+  return _paystack
+}
 
 export async function initializeTransaction(params: {
   email: string
@@ -15,13 +21,13 @@ export async function initializeTransaction(params: {
   callback_url?: string
   metadata?: Record<string, unknown>
 }) {
-  const { data } = await paystack.post('/transaction/initialize', params)
+  const { data } = await getPaystack().post('/transaction/initialize', params)
   return data.data as { authorization_url: string; access_code: string; reference: string }
 }
 
 export async function verifyTransaction(reference: string) {
-  const { data } = await paystack.get(`/transaction/verify/${reference}`)
+  const { data } = await getPaystack().get(`/transaction/verify/${reference}`)
   return data.data
 }
 
-export { paystack }
+export { getPaystack as paystack }

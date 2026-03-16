@@ -1,15 +1,22 @@
 import { v2 as cloudinary } from 'cloudinary'
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+let configured = false
+function ensureConfig() {
+  if (!configured) {
+    cloudinary.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    })
+    configured = true
+  }
+}
 
 export async function uploadToCloudinary(
   buffer: Buffer,
   options: { subfolder?: string; resource_type?: 'image' | 'raw' | 'video' } = {}
 ): Promise<{ secure_url: string; public_id: string }> {
+  ensureConfig()
   const { subfolder = 'images', resource_type = 'image' } = options
 
   return new Promise((resolve, reject) => {
@@ -33,6 +40,7 @@ export async function uploadBuffer(
   buffer: Buffer,
   options: { subfolder?: string; resource_type?: 'image' | 'raw' | 'video'; public_id?: string } = {}
 ): Promise<{ secure_url: string; public_id: string }> {
+  ensureConfig()
   const { subfolder = 'images', resource_type = 'image', public_id } = options
 
   return new Promise((resolve, reject) => {

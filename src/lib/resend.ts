@@ -1,9 +1,15 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY!)
+  }
+  return _resend
+}
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to,
     subject,
@@ -46,7 +52,7 @@ export async function sendAgreementSigningEmail(opts: {
   rentPeriod: string
 }) {
   const fromEmail = process.env.RESEND_FROM_AGREEMENTS ?? process.env.RESEND_FROM_EMAIL!
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: fromEmail,
     to: opts.to,
     subject: `Sign Your Tenancy Agreement — ${opts.propertyTitle}`,
@@ -90,7 +96,7 @@ export async function sendSignedAgreementEmail(opts: {
   otherPartyName: string
 }) {
   const fromEmail = process.env.RESEND_FROM_AGREEMENTS ?? process.env.RESEND_FROM_EMAIL!
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: fromEmail,
     to: opts.to,
     subject: `Agreement Fully Signed — ${opts.propertyTitle}`,

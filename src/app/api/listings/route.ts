@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
         furnished: furnished ?? false,
         description: description ?? null,
         amenities: amenities ?? [],
-        status: 'draft',
+        status: 'active',
       },
     })
 

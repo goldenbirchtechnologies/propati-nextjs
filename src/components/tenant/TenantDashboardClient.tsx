@@ -34,7 +34,7 @@ const MODE_CONFIG: Record<TenantMode, {
     label: 'Rent a Home',
     emoji: '\uD83C\uDFE0',
     welcomeText: 'to rent a home',
-    color: 'bg-teal',
+    color: 'bg-teal-600',
   },
   buy: {
     label: 'Buy Property',
@@ -46,13 +46,13 @@ const MODE_CONFIG: Record<TenantMode, {
     label: 'Short Stay',
     emoji: '\uD83C\uDF34',
     welcomeText: 'to short stay',
-    color: 'bg-teal',
+    color: 'bg-amber-600',
   },
   share: {
     label: 'Find a Roommate',
     emoji: '\uD83E\uDD1D',
     welcomeText: 'to find a roommate',
-    color: 'bg-teal',
+    color: 'bg-purple-600',
   },
 }
 
@@ -102,8 +102,8 @@ export default function TenantDashboardClient({
             onClick={() => setMode(tab.mode)}
             className={`flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-medium transition-all ${
               mode === tab.mode
-                ? 'border-2 border-teal bg-white text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'border-2 border-teal-600 bg-teal-50 text-teal-600-800 shadow-sm'
+                : 'text-muted-foreground hover:bg-gray-50 hover:text-foreground'
             }`}
           >
             <span>{tab.emoji}</span>
@@ -203,7 +203,7 @@ export default function TenantDashboardClient({
             href={`/${locale}/`}
             className="inline-flex items-center gap-1.5 rounded-full border bg-white px-4 py-2 text-sm font-medium hover:bg-muted"
           >
-            <Search className="h-4 w-4 text-teal" />
+            <Search className="h-4 w-4 text-teal-600" />
             Browse
           </Link>
           <Link

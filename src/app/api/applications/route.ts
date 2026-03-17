@@ -8,6 +8,7 @@ const APPLICATION_MESSAGES: Record<string, string> = {
   rent: 'I would like to apply to rent this property. Please let me know the next steps and any requirements.',
   sale: 'I am interested in making an offer on this property. I would like to discuss pricing and terms.',
   'short-let': 'I would like to book this property for a short-let stay. Please share availability and booking details.',
+  short_let: 'I would like to book this property for a short-let stay. Please share availability and booking details.',
   share: 'I am interested in sharing this property. I would like to learn more about the arrangement and meet current occupants.',
   commercial: 'I am interested in this commercial property. I would like to discuss terms and schedule a viewing.',
 }
@@ -51,19 +52,17 @@ export async function POST(req: NextRequest) {
 
     const type = listingType || listing.listingType || 'rent'
     const typeLabel =
-      type === 'short-let' ? 'Short-let Booking' :
+      type === 'short-let' || type === 'short_let' ? 'Short-let Booking' :
       type === 'sale' ? 'Purchase Offer' :
       type === 'share' ? 'Share Request' :
       type === 'commercial' ? 'Commercial Enquiry' :
       'Rental Application'
 
     // Check if conversation already exists for this listing + tenant
-    const existing = await prisma.conversation.findUnique({
+    const existing = await prisma.conversation.findFirst({
       where: {
-        listingId_tenantId: {
-          listingId: listing.id,
-          tenantId: user.id,
-        },
+        listingId: listing.id,
+        tenantId: user.id,
       },
     })
 
@@ -138,8 +137,9 @@ export async function POST(req: NextRequest) {
       conversationId: conversation.id,
       message: 'Application submitted successfully',
     })
-  } catch (error) {
-    console.error('Application error:', error)
-    return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 })
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('Application error:', msg, error)
+    return NextResponse.json({ error: `Failed to submit application: ${msg}` }, { status: 500 })
   }
 }

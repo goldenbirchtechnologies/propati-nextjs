@@ -433,9 +433,10 @@ export function ProfileEditForm({ user, role, locale }: ProfileEditFormProps) {
           <button
             type="button"
             onClick={() => setShowVerify(true)}
-            className="mt-4 w-full rounded-lg border border-teal-600 py-2.5 text-sm font-semibold text-teal-600 hover:bg-teal-50 transition-colors"
+            className="mt-4 w-full rounded-lg bg-teal-600 py-2.5 text-sm font-bold text-white hover:bg-teal-700 transition-colors shadow-sm"
           >
-            Verify Now
+            <Shield className="inline-block h-4 w-4 mr-2 -mt-0.5" />
+            Verify My Identity
           </button>
         ) : (
           <div className="mt-4">

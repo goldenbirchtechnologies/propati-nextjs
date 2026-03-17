@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { SignOutButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
@@ -31,7 +32,7 @@ export default function MobileNav({ role, locale, open, onClose }: MobileNavProp
         <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={onClose} />
         <div className="fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col bg-white shadow-xl md:hidden">
           <div className="flex h-14 items-center justify-between border-b px-4">
-            <span className="font-display text-xl font-bold text-gold">PROPATI</span>
+            <Image src="/logo.svg" alt="myPROPATi" width={110} height={28} />
             <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted" aria-label="Close menu">
               <X className="h-5 w-5" />
             </button>
@@ -89,7 +90,7 @@ export default function MobileNav({ role, locale, open, onClose }: MobileNavProp
       <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={onClose} />
       <div className="fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col bg-white shadow-xl md:hidden">
         <div className="flex h-14 items-center justify-between border-b px-4">
-          <span className="font-display text-xl font-bold text-gold">PROPATI</span>
+          <Image src="/logo.svg" alt="myPROPATi" width={110} height={28} />
           <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted" aria-label="Close menu">
             <X className="h-5 w-5" />
           </button>

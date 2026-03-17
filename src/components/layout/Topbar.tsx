@@ -1,7 +1,9 @@
 'use client'
 
+import Image from 'next/image'
+import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
-import { Menu } from 'lucide-react'
+import { Menu, ExternalLink } from 'lucide-react'
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher'
 
 interface TopbarProps {
@@ -12,7 +14,7 @@ interface TopbarProps {
   onMenuClick: () => void
 }
 
-export default function Topbar({ fullName, onMenuClick }: TopbarProps) {
+export default function Topbar({ fullName, locale, onMenuClick }: TopbarProps) {
   return (
     <header className="flex h-14 items-center justify-between border-b bg-white px-4 md:px-6">
       {/* Mobile menu button */}
@@ -30,10 +32,19 @@ export default function Topbar({ fullName, onMenuClick }: TopbarProps) {
       </p>
 
       {/* Mobile logo */}
-      <span className="font-display text-lg font-bold text-gold md:hidden">PROPATI</span>
+      <Link href={`/${locale}/`} className="md:hidden">
+        <Image src="/logo.svg" alt="myPROPATi" width={100} height={24} priority />
+      </Link>
 
-      {/* Language + User */}
+      {/* Back to Website + Language + User */}
       <div className="flex items-center gap-2">
+        <Link
+          href={`/${locale}/`}
+          className="hidden md:flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Website
+        </Link>
         <LanguageSwitcher variant="light" />
         <UserButton
           afterSignOutUrl="/"

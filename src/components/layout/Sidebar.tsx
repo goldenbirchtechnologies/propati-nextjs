@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { SignOutButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
@@ -10,7 +11,7 @@ import {
   Shield, User, CreditCard, Search, Wrench, Users,
   BarChart3, Upload, Flag, AlertTriangle, DollarSign,
   Phone, LogOut, Heart, Receipt, Wallet, ShoppingCart,
-  Calculator, ArrowRightLeft, Calendar, Handshake,
+  Calculator, ArrowRightLeft, Calendar, Handshake, ExternalLink,
 } from 'lucide-react'
 
 interface NavItem {
@@ -230,9 +231,20 @@ export default function Sidebar({ role, locale }: { role: string; locale: string
     return (
       <aside className="hidden w-[240px] flex-col border-r bg-white md:flex">
         {/* Logo */}
-        <div className="flex h-14 items-center border-b px-5">
-          <Link href={`/${locale}/`} className="font-display text-xl font-bold text-gold">
-            PROPATI
+        <div className="flex h-14 items-center border-b px-4">
+          <Link href={`/${locale}/`} className="flex items-center gap-2">
+            <Image src="/logo.svg" alt="myPROPATi" width={130} height={32} priority />
+          </Link>
+        </div>
+
+        {/* Back to website */}
+        <div className="px-3 pt-3 pb-1">
+          <Link
+            href={`/${locale}/`}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Back to Website
           </Link>
         </div>
 
@@ -271,9 +283,20 @@ export default function Sidebar({ role, locale }: { role: string; locale: string
   return (
     <aside className="hidden w-[240px] flex-col border-r bg-white md:flex">
       {/* Logo */}
-      <div className="flex h-14 items-center border-b px-5">
-        <Link href={`/${locale}/`} className="font-display text-xl font-bold text-gold">
-          PROPATI
+      <div className="flex h-14 items-center border-b px-4">
+        <Link href={`/${locale}/`} className="flex items-center gap-2">
+          <Image src="/logo.svg" alt="myPROPATi" width={130} height={32} priority />
+        </Link>
+      </div>
+
+      {/* Back to website */}
+      <div className="px-3 pt-3 pb-1">
+        <Link
+          href={`/${locale}/`}
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Back to Website
         </Link>
       </div>
 

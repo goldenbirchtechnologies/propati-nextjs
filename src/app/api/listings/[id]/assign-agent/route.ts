@@ -32,13 +32,33 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const { agentEmail } = await request.json()
 
-    const agent = await prisma.user.findFirst({
-      where: { email: agentEmail, role: 'agent' },
-      select: { id: true, fullName: true, email: true },
-    })
-    if (!agent) {
-      return NextResponse.json({ success: false, error: 'No agent found with that email' }, { status: 404 })
+    if (!agentEmail || typeof agentEmail !== 'string') {
+      return NextResponse.json({ success: false, error: 'Agent email is required' }, { status: 400 })
     }
+
+    const normalizedEmail = agentEmail.trim().toLowerCase()
+
+    // First check if any user exists with this email
+    const userWithEmail = await prisma.user.findFirst({
+      where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
+      select: { id: true, fullName: true, email: true, role: true },
+    })
+
+    if (!userWithEmail) {
+      return NextResponse.json({
+        success: false,
+        error: `No user found with email "${normalizedEmail}". They need to sign up on PROPATI first.`,
+      }, { status: 404 })
+    }
+
+    if (userWithEmail.role !== 'agent') {
+      return NextResponse.json({
+        success: false,
+        error: `${userWithEmail.fullName} (${userWithEmail.email}) is registered as a "${userWithEmail.role}", not as an agent. They need to sign up with the "agent" role.`,
+      }, { status: 400 })
+    }
+
+    const agent = userWithEmail
 
     if (agent.id === dbUser.id) {
       return NextResponse.json({ success: false, error: 'Cannot assign yourself' }, { status: 400 })

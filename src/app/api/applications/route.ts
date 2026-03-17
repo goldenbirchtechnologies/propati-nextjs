@@ -114,20 +114,24 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Create notification for the landlord
-    await prisma.notification.create({
-      data: {
-        userId: listing.ownerId,
-        type: 'application',
-        title: `New ${typeLabel}`,
-        body: `${user.fullName} has submitted a ${typeLabel.toLowerCase()} for "${listing.title}"`,
+    // Create notification for the landlord (non-blocking)
+    try {
+      await prisma.notification.create({
         data: {
-          listingId: listing.id,
-          conversationId: conversation.id,
-          applicationType: type,
+          userId: listing.ownerId,
+          type: 'application',
+          title: `New ${typeLabel}`,
+          body: `${user.fullName} has submitted a ${typeLabel.toLowerCase()} for "${listing.title}"`,
+          data: {
+            listingId: listing.id,
+            conversationId: conversation.id,
+            applicationType: type,
+          },
         },
-      },
-    })
+      })
+    } catch (notifErr) {
+      console.error('Failed to create notification (non-critical):', notifErr)
+    }
 
     return NextResponse.json({
       success: true,

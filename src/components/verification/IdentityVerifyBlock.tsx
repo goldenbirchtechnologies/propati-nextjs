@@ -111,7 +111,7 @@ export function IdentityVerifyBlock({ onVerified, onReset, compact = false }: Pr
             </div>
             <div className="flex gap-2">
               <button onClick={handleConfirm}
-                className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg font-bold text-sm hover:bg-teal-700 transition-colors">
+                className="flex-1 py-2.5 bg-teal text-white rounded-lg font-bold text-sm hover:bg-teal/90 transition-colors">
                 Yes, that&apos;s me
               </button>
               <button onClick={handleReset}
@@ -130,7 +130,7 @@ export function IdentityVerifyBlock({ onVerified, onReset, compact = false }: Pr
 
         {!showConfirm && (
           <button onClick={handleVerify} disabled={verifying || !idNumber.trim()}
-            className="w-full py-3 bg-teal-600 text-white rounded-xl font-bold text-sm hover:bg-teal-700 disabled:opacity-50 transition-colors">
+            className="w-full py-3 bg-teal text-white rounded-xl font-bold text-sm hover:bg-teal/90 disabled:opacity-50 transition-colors">
             {verifying ? 'Verifying...' : 'Verify Identity'}
           </button>
         )}

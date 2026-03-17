@@ -47,7 +47,20 @@ const config: Config = {
         // Brand
         gold: '#c9952a',
         rust: '#d4622a',
-        teal: '#0e7c6a',
+        teal: {
+          DEFAULT: '#0e7c6a',
+          50: '#effefb',
+          100: '#c8fff3',
+          200: '#91fee8',
+          300: '#52f5da',
+          400: '#1ee1c6',
+          500: '#07c5ad',
+          600: '#0e7c6a',
+          700: '#0a6757',
+          800: '#0c5246',
+          900: '#0f443b',
+          950: '#012923',
+        },
         // Landlord theme
         landlord: { bg: '#0f0f0f', surface: '#141414', accent: '#d4622a' },
         // Tenant theme

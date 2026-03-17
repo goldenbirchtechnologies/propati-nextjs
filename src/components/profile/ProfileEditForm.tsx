@@ -70,7 +70,7 @@ const GUARANTOR_RELATIONSHIP_OPTIONS = [
 ]
 
 const inputClass =
-  'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors'
+  'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal transition-colors'
 const labelClass = 'block text-xs font-semibold text-gray-500 mb-1.5'
 
 export function ProfileEditForm({ user, role, locale }: ProfileEditFormProps) {
@@ -433,7 +433,7 @@ export function ProfileEditForm({ user, role, locale }: ProfileEditFormProps) {
           <button
             type="button"
             onClick={() => setShowVerify(true)}
-            className="mt-4 w-full rounded-lg bg-teal-600 py-2.5 text-sm font-bold text-white hover:bg-teal-700 transition-colors shadow-sm"
+            className="mt-4 w-full rounded-lg bg-teal py-2.5 text-sm font-bold text-white hover:bg-teal/90 transition-colors shadow-sm"
           >
             <Shield className="inline-block h-4 w-4 mr-2 -mt-0.5" />
             Verify My Identity
@@ -473,7 +473,7 @@ export function ProfileEditForm({ user, role, locale }: ProfileEditFormProps) {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-teal-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 rounded-lg bg-teal px-6 py-2.5 text-sm font-bold text-white hover:bg-teal/90 disabled:opacity-50 transition-colors"
           >
             {saving ? (
               <>

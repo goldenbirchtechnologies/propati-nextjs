@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
+import { auth } from '@clerk/nextjs/server'
 import ListingCard from '@/components/listings/ListingCard'
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher'
+import AuthNavButtons from '@/components/shared/AuthNavButtons'
 import { Search, Star, CheckCircle, ShieldCheck, AlertCircle, Building2, Users, Headphones, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -26,6 +28,20 @@ export default async function HomePage({
   const locale = params.locale
   const activeType = searchParams.type ?? ''
   const query = searchParams.q ?? ''
+
+  // Check if user is authenticated
+  let userRole: string | null = null
+  try {
+    const { userId } = auth()
+    if (userId) {
+      const dbUser = await prisma.user.findUnique({
+        where: { clerkUserId: userId },
+        select: { role: true },
+      })
+      userRole = dbUser?.role ?? null
+    }
+  } catch {}
+
 
   let listings: any[] = []
   try {
@@ -122,18 +138,7 @@ export default async function HomePage({
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher variant="light" />
-            <Link
-              href={`/${locale}/sign-in`}
-              className="rounded-full px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-[#2563EB]"
-            >
-              Sign In
-            </Link>
-            <Link
-              href={`/${locale}/sign-up`}
-              className="rounded-full bg-[#2563EB] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8]"
-            >
-              Get Started
-            </Link>
+            <AuthNavButtons locale={locale} userRole={userRole} />
           </div>
         </div>
       </nav>
@@ -221,7 +226,7 @@ export default async function HomePage({
             return (
               <Link
                 key={t.value}
-                href={`/?type=${t.value}${query ? `&q=${encodeURIComponent(query)}` : ''}`}
+                href={`/${locale}?type=${t.value}${query ? `&q=${encodeURIComponent(query)}` : ''}`}
                 className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-[#2563EB] text-white shadow-sm'

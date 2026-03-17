@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
           conversationId: existing.id,
           senderId: user.id,
           content: `[${typeLabel}] ${APPLICATION_MESSAGES[type] || APPLICATION_MESSAGES.rent}`,
-          type: 'application',
+          type: 'text',
         },
       })
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
           create: {
             senderId: user.id,
             content: `[${typeLabel}] ${APPLICATION_MESSAGES[type] || APPLICATION_MESSAGES.rent}`,
-            type: 'application',
+            type: 'text',
           },
         },
       },
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       await prisma.notification.create({
         data: {
           userId: listing.ownerId,
-          type: 'application',
+          type: 'text',
           title: `New ${typeLabel}`,
           body: `${user.fullName} has submitted a ${typeLabel.toLowerCase()} for "${listing.title}"`,
           data: {
